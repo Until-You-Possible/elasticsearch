@@ -8,7 +8,7 @@
 ```
 ***PS***
 
-我此次使用的es8的版本，需要注意的是es8开始，es是默认开启ssl认证的，启动es后，没有ssl的认证是不能访问9200端口的，
+最新的es8的版本，需要注意的是es8开始，es是默认开启ssl认证的，启动es后，没有ssl的认证是不能访问9200端口的，
 在本地做测试或者是学习的时候，可以修改es的配置
 
 ```yaml
@@ -44,6 +44,8 @@ es的low level client是通过http协议于es服务进行通信的。请求编�
 **java high level client**
 
 high client其主要是公开特定的方法和API，基于low level client，并处理请求编码和响应解码。
+
+此次demo使用的是7.7版本。主要参考es官方文档整理。
 
 
 
