@@ -1,19 +1,18 @@
 package com.example.es.client;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.ExistsRequest;
-import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
-import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
-import co.elastic.clients.elasticsearch.indices.GetIndexRequest;
 import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
-import co.elastic.clients.transport.endpoints.BooleanResponse;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
+import com.example.es.core.Constants;
 import org.apache.http.HttpHost;
-import org.elasticsearch.client.RequestOptions;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
 
-import java.io.IOException;
+import java.util.List;
 
 public class ElasticSearchClient {
 
@@ -22,7 +21,11 @@ public class ElasticSearchClient {
     HttpHost httpHost = new HttpHost(Address, port);
 
 
-    public ElasticsearchClient createClient() {
+    public ElasticsearchClient getClient() {
+
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Constants.USERNAME, Constants.PASSWORD);
+        credentialsProvider.setCredentials(AuthScope.ANY, credentials);
 
         // Create the low-level client
         RestClient restClient = RestClient.builder(httpHost).build();
@@ -33,87 +36,44 @@ public class ElasticSearchClient {
         return new ElasticsearchClient(transport);
     }
 
-    /**
-     * 查看index是否在es中存在
-     * @param  indexName, Name of the Index
-     * @return true if found, false otherwise
-     * @throws IOException, if something happened
-     */
+}
 
-    public boolean existIndex(String indexName) throws IOException {
-        boolean result;
-        try {
-            BooleanResponse booleanResponse = createClient().indices()
-                    .exists(existRequest -> existRequest.index(indexName));
-            result = booleanResponse.value();
-        } catch (IOException e) {
-            result = false;
-        }
-        // log.info("== {} 索引是否存在: {}", result);
-        return result;
+class ElasticSearchOptions {
+    public static final String KEY_HOSTS = "hosts";
+
+    public static final String KEY_USERNAME = "username";
+
+    public static final String KEY_PASSWORD = "password";
+
+    public static final String KEY_HOSTNAME = "hostname";
+
+    public static final String KEY_PORT = "port";
+
+    public static final String KEY_SCHEME = "scheme";
+
+    private static final String ELASTICSEARCH = "elasticsearch";
+
+    private final String username;
+
+    private final String password;
+
+    private final List<HttpHost> hosts;
+
+    ElasticSearchOptions(String username, String password, List<HttpHost> hosts) {
+        this.username = username;
+        this.password = password;
+        this.hosts = hosts;
     }
 
-    /**
-     * 查看相关doc是否在index中存在
-     * @param indexName, Name of the index;
-     * @param id, ID of the document
-     * @return true if found, false otherwise
-     * @throws IOException,  if something happened
-     */
-    public boolean existDocument(String indexName, String id) throws IOException {
-        ExistsRequest request = new ExistsRequest.Builder()
-                .index(indexName)
-                .id(id)
-                .build();
-        boolean result;
-        try {
-            BooleanResponse response = createClient().exists(request);
-            result = response.value();
-        } catch (IOException e) {
-            result = false;
-        }
-        // log.info("== {} 文档是否存在: {}", result);
-        return result;
+    public List<HttpHost> getHostsList() {
+        return this.hosts;
     }
 
-
-    /**
-     * 删除相关 index
-     * @param indexName, Name of th index
-     * @return true if found, false otherwise
-     * @throws IOException，if something happened
-     */
-    public boolean deleteIndex(String indexName) throws IOException {
-        boolean result;
-        try {
-            DeleteIndexResponse deleteIndexResponse = createClient().indices().delete(d -> d.index(indexName));
-            result = deleteIndexResponse.acknowledged();
-        } catch (IOException e) {
-            // log.info("delete index message", e.getMessage(), e);
-            result = false;
-        }
-        // log.info("== {} index 是否被删除: {}", result);
-        return result;
-
+    public String getUsername() {
+        return username;
     }
 
-    /**
-     *
-     * 创建index (不指定Mapping)
-     * @param indexName Name of the index (needed)
-     * @return true if created successfully, false otherwise
-     * @throws IOException, if something happened
-     */
-    public boolean createIndex(String indexName) throws IOException {
-        boolean result;
-        try {
-            CreateIndexResponse createIndexResponse = createClient().indices().create(createRequest -> createRequest.index(indexName));
-            result = createIndexResponse.acknowledged();
-        } catch (IOException e) {
-            result = false;
-        }
-        // log.info("== {} index 是否被创建成功(不指定mapping的): {}", result);
-        return result;
+    public String getPassword() {
+        return password;
     }
-
 }
