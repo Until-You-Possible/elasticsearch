@@ -13,6 +13,8 @@ target/
 .springBeans
 .sts4-cache
 
+Account.json
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -23,6 +25,7 @@ target/
 /nbproject/private/
 /nbbuild/
 /dist/
+/privateInformation/
 /nbdist/
 /.nb-gradle/
 build/
