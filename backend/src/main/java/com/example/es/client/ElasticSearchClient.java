@@ -5,16 +5,28 @@ import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.example.es.core.Constants;
+import com.example.es.util.readSetting.ReadAccountMessage;
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 public class ElasticSearchClient {
+
+    ReadAccountMessage readAccountMessage;
+
+    private  ReadAccountMessage getReadAccountMessage() {
+        if (readAccountMessage == null) {
+            return readAccountMessage = new ReadAccountMessage();
+        }
+        return readAccountMessage;
+    }
 
     private static final String Address  = "localhost";
     private static final Integer port    = 9200;
@@ -36,44 +48,13 @@ public class ElasticSearchClient {
         return new ElasticsearchClient(transport);
     }
 
+    public  RestClientBuilder restClientBuilder() throws FileNotFoundException {
+        String username = getReadAccountMessage().getAccountInformation().get("username");
+        String password = getReadAccountMessage().getAccountInformation().get("password");
+        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+        credentialsProvider.setCredentials(AuthScope.ANY, credentials);
+    }
+
 }
 
-class ElasticSearchOptions {
-    public static final String KEY_HOSTS = "hosts";
-
-    public static final String KEY_USERNAME = "username";
-
-    public static final String KEY_PASSWORD = "password";
-
-    public static final String KEY_HOSTNAME = "hostname";
-
-    public static final String KEY_PORT = "port";
-
-    public static final String KEY_SCHEME = "scheme";
-
-    private static final String ELASTICSEARCH = "elasticsearch";
-
-    private final String username;
-
-    private final String password;
-
-    private final List<HttpHost> hosts;
-
-    ElasticSearchOptions(String username, String password, List<HttpHost> hosts) {
-        this.username = username;
-        this.password = password;
-        this.hosts = hosts;
-    }
-
-    public List<HttpHost> getHostsList() {
-        return this.hosts;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-}

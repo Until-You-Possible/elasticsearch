@@ -25,7 +25,7 @@ Account.json
 /nbproject/private/
 /nbbuild/
 /dist/
-/privateInformation/
+/src/main/resources/privateInformation/
 /nbdist/
 /.nb-gradle/
 build/

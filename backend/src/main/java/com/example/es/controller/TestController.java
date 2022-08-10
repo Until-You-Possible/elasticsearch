@@ -3,6 +3,7 @@ import com.example.es.service.ElasticSearchService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.example.es.util.readSetting.ReadAccountMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -56,5 +57,12 @@ public class TestController {
     public Map<String, Object> indexDetail() throws IOException {
         String indexName = "system";
         return getElasticSearchService().indexDetail(indexName);
+    }
+
+    @GetMapping("/getpath")
+    public HashMap<String, String> getPath() throws IOException {
+
+        return new ReadAccountMessage().getAccountInformation();
+
     }
 }
