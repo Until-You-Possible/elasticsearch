@@ -11,11 +11,9 @@ import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestClientBuilder;
-
-import java.io.FileNotFoundException;
-import java.util.List;
 
 public class ElasticSearchClient {
 
@@ -30,30 +28,41 @@ public class ElasticSearchClient {
 
     private static final String Address  = "localhost";
     private static final Integer port    = 9200;
-    HttpHost httpHost = new HttpHost(Address, port);
 
 
     public ElasticsearchClient getClient() {
 
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(Constants.USERNAME, Constants.PASSWORD);
-        credentialsProvider.setCredentials(AuthScope.ANY, credentials);
+//        String username = getUserName();
+//        String password = getPassword();
+//        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+//        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
+//        credentialsProvider.setCredentials(AuthScope.ANY, credentials);
+//        HttpHost httpHost = new HttpHost(username, port);
+//        RestClientBuilder builder = RestClient.builder(httpHost)
+//                .setHttpClientConfigCallback(new RestClientBuilder.HttpClientConfigCallback() {
+//                    @Override
+//                    public HttpAsyncClientBuilder customizeHttpClient(
+//                            HttpAsyncClientBuilder httpClientBuilder) {
+//                        return httpClientBuilder
+//                                .setDefaultCredentialsProvider(credentialsProvider);
+//                    }
+//                });
 
-        // Create the low-level client
+         // Create the low-level client
+        HttpHost httpHost = new HttpHost(Address, port);
         RestClient restClient = RestClient.builder(httpHost).build();
-
         ElasticsearchTransport transport = new RestClientTransport(
                 restClient, new JacksonJsonpMapper());
 
         return new ElasticsearchClient(transport);
     }
 
-    public  RestClientBuilder restClientBuilder() throws FileNotFoundException {
-        String username = getReadAccountMessage().getAccountInformation().get("username");
-        String password = getReadAccountMessage().getAccountInformation().get("password");
-        final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(username, password);
-        credentialsProvider.setCredentials(AuthScope.ANY, credentials);
+    public String getUserName() {
+        return getReadAccountMessage().getAccountInformation().get(Constants.USERNAME);
+    }
+
+    public String getPassword() {
+        return getReadAccountMessage().getAccountInformation().get(Constants.PASSWORD);
     }
 
 }

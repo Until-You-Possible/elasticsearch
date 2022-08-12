@@ -82,10 +82,10 @@ public class ElasticSearchService {
             DeleteIndexResponse deleteIndexResponse = getElasticSearchClient().indices().delete(d -> d.index(indexName));
             result = deleteIndexResponse.acknowledged();
         } catch (IOException e) {
-            // log.info("delete index message", e.getMessage(), e);
+             // log.info("delete index message", e.getMessage(), e);
             result = false;
         }
-        // log.info("== {} index 是否被删除: {}", result);
+         // log.info("== {} index 是否被删除: {}", result);
         return result;
 
     }

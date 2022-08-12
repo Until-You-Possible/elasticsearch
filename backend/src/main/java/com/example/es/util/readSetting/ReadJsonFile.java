@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 
 public class ReadJsonFile {
 
-    public String readJsonSetting(String fileName) throws FileNotFoundException {
+    public String readJsonSetting(String fileName) {
 
         String jsonString = "";
 

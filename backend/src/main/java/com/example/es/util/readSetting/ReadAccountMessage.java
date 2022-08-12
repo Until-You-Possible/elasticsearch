@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -18,7 +19,7 @@ public class ReadAccountMessage {
         return readJsonFile;
     }
 
-    public String readPathConfig() throws FileNotFoundException {
+    public String readPathConfig()  {
 
         // so, the first step is getting corresponding path that contains the account and password
         // base on the security
@@ -29,7 +30,7 @@ public class ReadAccountMessage {
         return getReadJsonFile().readJsonSetting(path);
     }
 
-    public String getAccountPathInfo() throws FileNotFoundException {
+    public String getAccountPathInfo() {
 
         String accountJsonString = readPathConfig();
 
@@ -39,8 +40,7 @@ public class ReadAccountMessage {
 
     }
 
-    public HashMap<String, String> getAccountInformation() throws FileNotFoundException {
-
+    public HashMap<String, String> getAccountInformation() {
         HashMap<String, String> hashMap = new HashMap<>();
 
         String infoPath = getAccountPathInfo();
@@ -56,7 +56,6 @@ public class ReadAccountMessage {
         hashMap.put("password", password);
 
         return hashMap;
-
     }
 
 }
