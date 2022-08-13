@@ -1,5 +1,8 @@
 package com.example.es.controller;
+import com.alibaba.fastjson.JSONObject;
 import com.example.es.service.ElasticSearchService;
+import com.example.es.util.request.HttpClientToInterface;
+import com.example.es.util.request.RestTemplateUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -64,5 +67,20 @@ public class TestController {
 
         return new ReadAccountMessage().getAccountInformation();
 
+    }
+
+    @GetMapping("/doget")
+    public String getCourse() {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("commentId", "13026194071");
+        return new HttpClientToInterface().doPost("http://tcc.taobao.com/cc/json/mobile_tel_segment.htm?tel=13026194071", jsonObject);
+    }
+
+    @GetMapping("/sp")
+    public HashMap<String, Object> sp() {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        String url = "https://open.sap.com/bridges/moochub/courses";
+        hashMap.put("message", RestTemplateUtil.doGetByJson(url));
+        return hashMap;
     }
 }
