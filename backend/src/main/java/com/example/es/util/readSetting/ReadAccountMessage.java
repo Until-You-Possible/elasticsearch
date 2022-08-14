@@ -2,6 +2,7 @@ package com.example.es.util.readSetting;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.example.es.util.CommonUtil;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -23,9 +24,9 @@ public class ReadAccountMessage {
 
         // so, the first step is getting corresponding path that contains the account and password
         // base on the security
+        // privateInformation/account.json
 
-        String path = Objects.requireNonNull(ReadAccountMessage.class.getClassLoader()
-                .getResource("privateInformation/account.json")).getPath();
+        String path = CommonUtil.getResourceFilePath("privateInformation/account.json");
 
         return getReadJsonFile().readJsonSetting(path);
     }

@@ -22,7 +22,13 @@ public class Constants {
 
     public static final String INITURL = "https://open.sap.com/bridges/moochub/courses";
 
-    public static final String COURSE_SETTING_JSON = "course_setting.json";
+    public static final String COURSE_SETTING_JSON = "setting/course_setting.json";
+
+    public static final String MAPPINGS = "mappings";
+
+    public static final String PROPERTIES = "properties";
+
+    public static final String KEYWORD = "keyword";
 
 
 

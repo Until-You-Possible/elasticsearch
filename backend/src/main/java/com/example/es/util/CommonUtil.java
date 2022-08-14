@@ -1,9 +1,11 @@
 package com.example.es.util;
 
 import com.alibaba.fastjson.JSONObject;
+import com.example.es.util.readSetting.ReadAccountMessage;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,5 +26,11 @@ public class CommonUtil {
         return Stream.of(list1, list2, list3).flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
+
+    public static String getResourceFilePath (String pathName) {
+        return Objects.requireNonNull(ReadAccountMessage.class.getClassLoader()
+                .getResource(pathName)).getPath();
+    }
+
 
 }

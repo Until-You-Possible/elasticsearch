@@ -81,4 +81,11 @@ public class TestController {
     public List<Object> sp() {
         return new IndexCourseService().getCourseData();
     }
+
+    @GetMapping("/createIndexWithMapping")
+    public HashMap<String, Object> createIndexWithMapping() throws IOException {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("message", getElasticSearchService().createIndexWithMapping("courses"));
+        return hashMap;
+    }
 }
