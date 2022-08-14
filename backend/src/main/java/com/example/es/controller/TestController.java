@@ -1,8 +1,8 @@
 package com.example.es.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.example.es.service.ElasticSearchService;
+import com.example.es.service.IndexCourseService;
 import com.example.es.util.request.HttpClientToInterface;
-import com.example.es.util.request.RestTemplateUtil;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -10,6 +10,7 @@ import com.example.es.util.readSetting.ReadAccountMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -63,7 +64,7 @@ public class TestController {
     }
 
     @GetMapping("/getpath")
-    public HashMap<String, String> getPath() throws IOException {
+    public HashMap<String, String> getPath() {
 
         return new ReadAccountMessage().getAccountInformation();
 
@@ -77,10 +78,7 @@ public class TestController {
     }
 
     @GetMapping("/sp")
-    public HashMap<String, Object> sp() {
-        HashMap<String, Object> hashMap = new HashMap<>();
-        String url = "https://open.sap.com/bridges/moochub/courses";
-        hashMap.put("message", RestTemplateUtil.doGetByJson(url));
-        return hashMap;
+    public List<Object> sp() {
+        return new IndexCourseService().getCourseData();
     }
 }

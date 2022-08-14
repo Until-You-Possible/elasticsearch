@@ -3,27 +3,41 @@ package com.example.es.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.mapping.Property;
 import co.elastic.clients.elasticsearch.core.ExistsRequest;
+import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
 import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
+import com.alibaba.fastjson.JSONObject;
 import com.example.es.client.ElasticSearchClient;
 import com.example.es.core.Constants;
+import com.example.es.util.readSetting.ReadJsonFile;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.example.es.core.Constants.COURSE_SETTING_JSON;
+
 public class ElasticSearchService {
 
     private ElasticsearchClient elasticsearchClient;
+
+    ReadJsonFile readJsonFile;
 
     private ElasticsearchClient getElasticSearchClient() {
         if (elasticsearchClient == null) {
             return elasticsearchClient = new ElasticSearchClient().getClient();
         }
         return elasticsearchClient;
+    }
+
+    private ReadJsonFile getReadJsonFile() {
+        if (readJsonFile == null) {
+            return  readJsonFile = new ReadJsonFile();
+        }
+        return readJsonFile;
     }
 
     /**
@@ -112,7 +126,12 @@ public class ElasticSearchService {
 
     // 指定mapping创建index
     public void createIndexWithMapping() {
-
+        // 获取相关mapping
+        String getSetting = getReadJsonFile().readJsonSetting(COURSE_SETTING_JSON);
+        CreateIndexRequest request = new CreateIndexRequest("ddd");
+//        CreateIndexResponse createIndexResponse = getElasticSearchClient().indices().create(createRequest ->
+//                        createRequest.mappings(JSONObject.parseObject(getSetting))
+//                );
     }
 
 

@@ -1,0 +1,93 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": "1",
+      "number_of_replicas": "2",
+      "analysis": {
+        "filter": {
+          "autocomplete_filter": {
+            "type": "edge_ngram",
+            "min_gram": "1",
+            "max_gram": "15"
+          }
+        },
+        "analyzer": {
+          "autocomplete_index": {
+            "filter": [
+              "lowercase",
+              "autocomplete_filter"
+            ],
+            "type": "custom",
+            "tokenizer": "standard"
+          },
+          "autocomplete_search": {
+            "filter": [
+              "lowercase"
+            ],
+            "type": "custom",
+            "tokenizer": "standard"
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "courseId": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "courseCode": {
+        "type": "keyword"
+      },
+      "abstract": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "description": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "languages": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "startDate": {
+        "type": "date"
+      },
+      "endDate": {
+        "type": "date"
+      },
+      "image": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "video": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "learningObjectives": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "duration": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "__timestamp": {
+        "type": "date"
+      }
+    }
+  }
+}

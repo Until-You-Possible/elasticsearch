@@ -16,5 +16,14 @@ public class Constants {
 
     public static final String INDEX_NAME = "indexName";
 
+    public static final String DATA = "data";
+
+    public static final int FIRSTPAGE = 1;
+
+    public static final String INITURL = "https://open.sap.com/bridges/moochub/courses";
+
+    public static final String COURSE_SETTING_JSON = "course_setting.json";
+
+
 
 }
