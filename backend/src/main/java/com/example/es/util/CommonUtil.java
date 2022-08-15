@@ -22,8 +22,23 @@ public class CommonUtil {
         return JSONObject.parseArray(getString, Object.class);
     }
 
-    public static<T> List<T> mergeArray(List<T> list1, List<T> list2, List<T> list3) {
-        return Stream.of(list1, list2, list3).flatMap(Collection::stream)
+
+    /**
+     * 说明：在没有打注解@SafeVarargs之前 会有waring： Possible heap pollution from parameterized vararg type
+     *  heap pollution(堆污染)
+     *  在java编程语言中，当一个可变generic参数指向一个无generic时， head pollution就有可能发生
+     *  head pollution 可能导致 ClassCastException 等异常。
+     *  可变的非具体化 形式参数的方法消除警告
+     *  1：使用注解： @SafeVarargs
+     *  2：使用注解：@SuppressWarnings({"unchecked", "varargs"})
+     *
+     * @param lists lists
+     * @param Object <T>
+     * @return list<T>
+     */
+    @SafeVarargs
+    public static<T> List<T> mergeArray(List<T> ...lists) {
+        return Stream.of(lists).flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 

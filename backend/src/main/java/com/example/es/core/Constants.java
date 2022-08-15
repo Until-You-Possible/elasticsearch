@@ -30,6 +30,8 @@ public class Constants {
 
     public static final String KEYWORD = "keyword";
 
+    public static final String TYPE = "type";
+
 
 
 }

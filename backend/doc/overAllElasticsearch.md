@@ -45,7 +45,6 @@ es的low level client是通过http协议于es服务进行通信的。请求编�
 
 high client其主要是公开特定的方法和API，基于low level client，并处理请求编码和响应解码。
 
-此次demo使用的是7.17.5版本。主要参考es官方文档整理。
 
 
 
