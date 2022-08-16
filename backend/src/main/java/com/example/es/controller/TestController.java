@@ -87,8 +87,6 @@ public class TestController {
 
     @GetMapping("/createIndexWithMapping")
     public HashMap<String, Object> createIndexWithMapping() throws IOException {
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("message", getElasticSearchService().createIndexWithMapping("courses"));
-        return hashMap;
+        return getElasticSearchService().createIndexWithMapping("courses");
     }
 }

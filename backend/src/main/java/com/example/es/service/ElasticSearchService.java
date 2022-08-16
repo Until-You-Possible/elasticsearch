@@ -4,20 +4,23 @@ import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.mapping.*;
 import co.elastic.clients.elasticsearch.core.ExistsRequest;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
-import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
-import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
-import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
-import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
+import co.elastic.clients.elasticsearch.indices.*;
+import co.elastic.clients.elasticsearch.transform.Settings;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
+import co.elastic.clients.util.ObjectBuilder;
 import com.alibaba.fastjson.JSONObject;
 import com.example.es.client.ElasticSearchClient;
 import com.example.es.core.Constants;
 import com.example.es.core.EnumDataType;
+import com.example.es.core.EnumIndexesType;
 import com.example.es.util.CommonUtil;
 import com.example.es.util.readSetting.ReadJsonFile;
+import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
+import java.util.function.Function;
 
 import static com.example.es.core.Constants.*;
 import static com.example.es.core.EnumDataType.*;
@@ -136,29 +139,19 @@ public class ElasticSearchService {
 
 
     // 指定mapping创建index
-    public Boolean createIndexWithMapping(String indexName) throws IOException {
+    public HashMap<String, Object> createIndexWithMapping(String indexName) throws IOException {
         // 获取resource下对应的配置
-        String getSetting = getReadJsonFile().readJsonSetting(
-                CommonUtil.getResourceFilePath(COURSE_SETTING_JSON)
-        );
-        JSONObject settingObject = JSONObject.parseObject(getSetting);
-        // 获取properties
-        JSONObject properties = settingObject.getJSONObject(MAPPINGS).getJSONObject(PROPERTIES);
-        //定义文档属性
-        Map<String, Property> propertyMap = new HashMap<>();
-
-        properties.keySet().forEach(key -> propertyMap.put(key, handleTypesProperties((String) properties.getJSONObject(key).get(TYPE))));
-
-        // 设置索引的文档类型映射
-        TypeMapping typeMapping = new TypeMapping.Builder()
-                .properties(propertyMap)
-                .build();
+        InputStream inputStreamSettingJson = this.getClass().getResourceAsStream(EnumIndexesType.valueOf(indexName.toUpperCase()).getSettingName());
         CreateIndexRequest request = new CreateIndexRequest.Builder()
                 .index(indexName)
-                .mappings(typeMapping)
+                .withJson(inputStreamSettingJson)
                 .build();
         CreateIndexResponse createIndexResponse = getElasticSearchClient().indices().create(request);
-        return createIndexResponse.acknowledged();
+        HashMap<String, Object> hashMap  = new HashMap<>();
+        hashMap.put(INDEX_NAME, indexName);
+        hashMap.put(SUCCESS, createIndexResponse.acknowledged());
+        hashMap.put(CREATEDTIME, CommonUtil.getCurrentTime());
+        return hashMap;
     }
 
 

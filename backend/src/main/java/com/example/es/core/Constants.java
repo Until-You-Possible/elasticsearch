@@ -18,11 +18,7 @@ public class Constants {
 
     public static final String DATA = "data";
 
-    public static final int FIRSTPAGE = 1;
-
-    public static final String INITURL = "https://open.sap.com/bridges/moochub/courses";
-
-    public static final String COURSE_SETTING_JSON = "setting/course_setting.json";
+    public static final String COURSE_SETTING_JSON = "courses_setting.json";
 
     public static final String MAPPINGS = "mappings";
 
@@ -31,6 +27,14 @@ public class Constants {
     public static final String KEYWORD = "keyword";
 
     public static final String TYPE = "type";
+
+    public static final String SUFFIX_SETTING_JSON = "_setting.json";
+
+    public static final String SUCCESS = "success";
+
+    public static final String CREATEDTIME = "createdTime";
+
+
 
 
 

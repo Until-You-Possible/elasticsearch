@@ -47,5 +47,9 @@ public class CommonUtil {
                 .getResource(pathName)).getPath();
     }
 
+    public static long getCurrentTime() {
+        return System.currentTimeMillis();
+    }
+
 
 }
