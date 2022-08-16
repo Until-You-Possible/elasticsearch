@@ -78,8 +78,11 @@ public class TestController {
     }
 
     @GetMapping("/sp")
-    public List<Object> sp() {
-        return new IndexCourseService().getCourseData();
+    public HashMap<String, Object> sp() {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("message", new IndexCourseService().getCourseData());
+        hashMap.put("size", new IndexCourseService().getCourseData().size());
+        return hashMap;
     }
 
     @GetMapping("/createIndexWithMapping")
