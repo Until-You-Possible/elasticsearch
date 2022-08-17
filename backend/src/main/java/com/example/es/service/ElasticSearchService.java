@@ -17,6 +17,8 @@ import com.example.es.util.CommonUtil;
 import com.example.es.util.readSetting.ReadJsonFile;
 import org.springframework.core.io.Resource;
 
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -141,7 +143,8 @@ public class ElasticSearchService {
     // 指定mapping创建index
     public HashMap<String, Object> createIndexWithMapping(String indexName) throws IOException {
         // 获取resource下对应的配置
-        InputStream inputStreamSettingJson = this.getClass().getResourceAsStream(EnumIndexesType.valueOf(indexName.toUpperCase()).getSettingName());
+         String fileName = EnumIndexesType.valueOf(indexName.toUpperCase()).getSettingName();
+        InputStream inputStreamSettingJson = this.getClass().getClassLoader().getResourceAsStream(fileName);
         CreateIndexRequest request = new CreateIndexRequest.Builder()
                 .index(indexName)
                 .withJson(inputStreamSettingJson)
@@ -169,6 +172,26 @@ public class ElasticSearchService {
             hashMap.put(Constants.MESSAGE, e.getMessage());
         }
         return hashMap;
+    }
+    //向ES写入数据
+    public HashMap<String, Object> fillIndexData(List<Object> payload, String indexName) {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        if (Objects.requireNonNull(payload).isEmpty()) {
+            hashMap.put(MESSAGE, "payload is empty");
+            return  hashMap;
+        }
+
+    }
+
+    // 写入数据之前的相关操作
+    public HashMap<String, Object> prepareFillIndexData(String indexName) throws IOException {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        boolean boolExist = existIndex(indexName);
+        if (boolExist) {
+            boolean boolDelete = deleteIndex(indexName);
+            if (boolDelete) {
+            }
+        }
     }
 
     // 添加文档
