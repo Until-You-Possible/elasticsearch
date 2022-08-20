@@ -32,7 +32,19 @@ public class Constants {
 
     public static final String SUCCESS = "success";
 
-    public static final String CREATEDTIME = "createdTime";
+    public static final String CREATE_TIME = "createdTime";
+
+    public static final String DELETE_INDEX = "delete index";
+
+    public static final String CREATE_INDEX = "create index";
+
+    public static final String UPDATE_INDEX = "update index";
+
+    public static final String RESULT = "result";
+
+    public static final String COUNT = "count";
+
+    public static final String COST_TIME = "cost_time";
 
 
 

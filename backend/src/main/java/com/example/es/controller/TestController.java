@@ -10,7 +10,6 @@ import com.example.es.util.readSetting.ReadAccountMessage;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -45,14 +44,14 @@ public class TestController {
     public HashMap<String, Object> deleteIndex() throws IOException {
         HashMap<String, Object> rawMap = new HashMap<>();
         String indexName = "system";
-        Boolean bool = getElasticSearchService().deleteIndex(indexName);
+        HashMap<String, Object> bool = getElasticSearchService().deleteIndex(indexName);
         rawMap.put("result",bool);
         rawMap.put("message", indexName + "has been deleted");
         return rawMap;
     }
 
     @GetMapping("/create")
-    public Boolean createIndex() throws IOException {
+    public HashMap<String, Object> createIndex() throws IOException {
         String indexName = "system2";
         return elasticSearchService.createIndex(indexName);
     }
@@ -87,6 +86,6 @@ public class TestController {
 
     @GetMapping("/createIndexWithMapping")
     public HashMap<String, Object> createIndexWithMapping() throws IOException {
-        return getElasticSearchService().createIndexWithMapping("courses");
+        return getElasticSearchService().fillIndexData("courses");
     }
 }

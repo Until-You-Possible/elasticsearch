@@ -2,7 +2,10 @@ package com.example.es.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.mapping.*;
+import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.ExistsRequest;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import co.elastic.clients.elasticsearch.indices.*;
 import co.elastic.clients.elasticsearch.transform.Settings;
@@ -13,6 +16,7 @@ import com.example.es.client.ElasticSearchClient;
 import com.example.es.core.Constants;
 import com.example.es.core.EnumDataType;
 import com.example.es.core.EnumIndexesType;
+import com.example.es.model.Courses;
 import com.example.es.util.CommonUtil;
 import com.example.es.util.readSetting.ReadJsonFile;
 import org.springframework.core.io.Resource;
@@ -21,8 +25,11 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.example.es.core.Constants.*;
 import static com.example.es.core.EnumDataType.*;
@@ -103,19 +110,19 @@ public class ElasticSearchService {
      * 删除相关 index
      * @param indexName, Name of th index
      * @return true if found, false otherwise
-     * @throws IOException，if something happened
      */
-    public boolean deleteIndex(String indexName) throws IOException {
-        boolean result;
+    public HashMap<String, Object> deleteIndex(String indexName) {
+        HashMap<String, Object> hashMap = new HashMap<>();
         try {
             DeleteIndexResponse deleteIndexResponse = getElasticSearchClient().indices().delete(d -> d.index(indexName));
-            result = deleteIndexResponse.acknowledged();
+            hashMap.put(SUCCESS, deleteIndexResponse.acknowledged());
         } catch (IOException e) {
              // log.info("delete index message", e.getMessage(), e);
-            result = false;
+            hashMap.put(SUCCESS, Boolean.FALSE);
+            hashMap.put(MESSAGE, e.getMessage());
         }
          // log.info("== {} index 是否被删除: {}", result);
-        return result;
+        return hashMap;
 
     }
 
@@ -126,17 +133,18 @@ public class ElasticSearchService {
      * @return true if created successfully, false otherwise
      * @throws IOException, if something happened
      */
-    public boolean createIndex(String indexName) throws IOException {
-        boolean result;
+    public HashMap<String, Object> createIndex(String indexName) throws IOException {
+        HashMap<String, Object> hashMap = new HashMap<>();
         try {
             CreateIndexResponse createIndexResponse = getElasticSearchClient()
                     .indices().create(createRequest -> createRequest.index(indexName));
-            result = createIndexResponse.acknowledged();
+            hashMap.put(SUCCESS, createIndexResponse.acknowledged());
         } catch (IOException e) {
-            result = false;
+            hashMap.put(SUCCESS, Boolean.FALSE);
+            hashMap.put(MESSAGE, e.getMessage());
         }
         // log.info("== {} index 是否被创建成功(不指定mapping的): {}", result);
-        return result;
+        return hashMap;
     }
 
 
@@ -153,46 +161,67 @@ public class ElasticSearchService {
         HashMap<String, Object> hashMap  = new HashMap<>();
         hashMap.put(INDEX_NAME, indexName);
         hashMap.put(SUCCESS, createIndexResponse.acknowledged());
-        hashMap.put(CREATEDTIME, CommonUtil.getCurrentTime());
         return hashMap;
     }
-
 
     // 查看索引相关的信息
     public HashMap<String, Object> indexDetail(String indexName) throws IOException {
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put(Constants.INDEX_NAME, indexName);
         try {
             GetIndexResponse getIndexResponse = getElasticSearchClient().indices()
                     .get(getRequest -> getRequest.index(indexName));
-
             Map<String, Property> propertyMap = Objects.requireNonNull(Objects.requireNonNull(getIndexResponse.get(indexName)).mappings()).properties();
-            hashMap.put(Constants.MESSAGE, propertyMap.keySet());
+            hashMap.put(MESSAGE, propertyMap.keySet());
         } catch (IOException e) {
-            hashMap.put(Constants.MESSAGE, e.getMessage());
+            hashMap.put(MESSAGE, e.getMessage());
         }
+        hashMap.put(INDEX_NAME, indexName);
         return hashMap;
     }
-    //向ES写入数据
-    public HashMap<String, Object> fillIndexData(List<Object> payload, String indexName) {
-        HashMap<String, Object> hashMap = new HashMap<>();
-        if (Objects.requireNonNull(payload).isEmpty()) {
-            hashMap.put(MESSAGE, "payload is empty");
-            return  hashMap;
-        }
 
+    //向ES写入数据
+    public HashMap<String, Object> fillIndexData(String indexName) throws IOException {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        List<Object> payload = getIndexCourseService().getCourseData();
+        HashMap<String, HashMap<String, Object>> map = prepareFillIndexData(indexName);
+        ArrayList<Object> objectArrayList = new ArrayList<>();
+        if ((boolean) map.get(RESULT).get(SUCCESS)) {
+            // 解析数据格式
+            payload.forEach(o -> objectArrayList.add(Courses.formatterSingleCourse((JSONObject) o)));
+        }
+        hashMap.put(MESSAGE,  bulkInsertDocument(objectArrayList, indexName));
+        hashMap.put(INDEX_NAME,  indexName);
+
+        return hashMap;
+    }
+
+    // 批量插入文档
+    public HashMap<String, Object> bulkInsertDocument(List<Object> payload, String indexName) throws IOException {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        List<BulkOperation> bulkOperationArrayList = new ArrayList<>();
+        for(Object o : payload) {
+            bulkOperationArrayList.add(BulkOperation.of(p -> p.index(i -> i.document(o))));
+        }
+        Instant beforeTime = Instant.now();
+        BulkResponse bulkResponse = getElasticSearchClient().bulk(os -> os.index(indexName).operations(bulkOperationArrayList));
+        Instant afterTime = Instant.now();
+        hashMap.put(COUNT, bulkResponse.items().size());
+        hashMap.put(COST_TIME, Duration.between(beforeTime,afterTime).getSeconds() + "(秒)");
+        return hashMap;
     }
 
     // 写入数据之前的相关操作
-    public HashMap<String, Object> prepareFillIndexData(String indexName) throws IOException {
-        HashMap<String, Object> hashMap = new HashMap<>();
+    public HashMap<String, HashMap<String, Object>> prepareFillIndexData(String indexName) throws IOException {
+        HashMap<String, HashMap<String, Object>> hashMap  = new HashMap<>();
         boolean boolExist = existIndex(indexName);
         if (boolExist) {
-            boolean boolDelete = deleteIndex(indexName);
-            if (boolDelete) {
-            }
+            hashMap.put(RESULT, deleteIndex(indexName));
+        } else {
+            hashMap.put(RESULT, createIndexWithMapping(indexName));
         }
+        return hashMap;
     }
+
 
     // 添加文档
     public void  addNewDocument() {
@@ -212,13 +241,6 @@ public class ElasticSearchService {
     // 删除文档
     public void deleteDocument() {
 
-    }
-
-    // 批量插入文档
-    public void bulkInsertDocument() {
-        // 获取所有数据
-        List<Object> list = getIndexCourseService().getCourseData();
-        List<BulkOperation> bulkOperationArrayList = new ArrayList<>();
     }
 
     // 处理mapping
