@@ -46,6 +46,8 @@ public class Constants {
 
     public static final String COST_TIME = "cost_time";
 
+    public static final String NOT_FOUND = "not found";
+
 
 
 

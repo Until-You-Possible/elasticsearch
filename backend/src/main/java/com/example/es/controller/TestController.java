@@ -3,6 +3,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.example.es.service.ElasticSearchService;
 import com.example.es.service.IndexCourseService;
 import com.example.es.util.request.HttpClientToInterface;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +16,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/test")
 public class TestController {
+
+    @Autowired
+    private IndexCourseService indexCourseService;
 
     private ElasticSearchService elasticSearchService;
 
@@ -34,7 +38,7 @@ public class TestController {
     public HashMap<String, Object> existIndex() throws IOException {
         HashMap<String, Object> rawMap = new HashMap<>();
         String indexName = "test";
-        Boolean bool = getElasticSearchService().existIndex(indexName);
+        HashMap<String, Object> bool = getElasticSearchService().existIndex(indexName);
         rawMap.put("result",bool);
         rawMap.put("message", indexName + " is existed");
         return rawMap;
@@ -86,6 +90,20 @@ public class TestController {
 
     @GetMapping("/createIndexWithMapping")
     public HashMap<String, Object> createIndexWithMapping() throws IOException {
-        return getElasticSearchService().fillIndexData("courses");
+        return indexCourseService.fillIndex();
+    }
+
+    @GetMapping("/getSingleDoc")
+    public HashMap<String, Object> mp() throws IOException {
+        String indexName = "courses";
+        String id = "2BnCvIIBhwgvFZLjVhls";
+        return getElasticSearchService().getDocumentInfo(indexName, id);
+    }
+
+    @GetMapping("/deleteSingle")
+    public HashMap<String, Object> dp() throws IOException {
+        String indexName = "courses";
+        String id = "2BnCvIIBhwgvFZLjVhls";
+        return getElasticSearchService().deleteDocument(indexName, id);
     }
 }

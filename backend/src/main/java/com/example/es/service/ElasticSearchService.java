@@ -1,40 +1,31 @@
 package com.example.es.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch._types.Result;
 import co.elastic.clients.elasticsearch._types.mapping.*;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
+import co.elastic.clients.elasticsearch.core.DeleteResponse;
 import co.elastic.clients.elasticsearch.core.ExistsRequest;
-import co.elastic.clients.elasticsearch.core.IndexRequest;
-import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch.core.GetResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
 import co.elastic.clients.elasticsearch.indices.*;
-import co.elastic.clients.elasticsearch.transform.Settings;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
-import co.elastic.clients.util.ObjectBuilder;
-import com.alibaba.fastjson.JSONObject;
 import com.example.es.client.ElasticSearchClient;
-import com.example.es.core.Constants;
 import com.example.es.core.EnumDataType;
 import com.example.es.core.EnumIndexesType;
-import com.example.es.model.Courses;
-import com.example.es.util.CommonUtil;
 import com.example.es.util.readSetting.ReadJsonFile;
-import org.springframework.core.io.Resource;
+import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static com.example.es.core.Constants.*;
-import static com.example.es.core.EnumDataType.*;
-import static com.example.es.core.EnumDataType.KEYWORD;
 
+
+@Service
 public class ElasticSearchService {
 
     private ElasticsearchClient elasticsearchClient;
@@ -58,28 +49,25 @@ public class ElasticSearchService {
         return readJsonFile;
     }
 
-    private IndexCourseService getIndexCourseService() {
-        return Objects.requireNonNullElseGet(indexCourseService, () -> indexCourseService = new IndexCourseService());
-    }
 
     /**
      * 查看index是否在es中存在
      * @param  indexName, Name of the Index
      * @return true if found, false otherwise
-     * @throws IOException, if something happened
      */
 
-    public boolean existIndex(String indexName) throws IOException {
-        boolean result;
+    public HashMap<String, Object> existIndex(String indexName) {
+        HashMap<String, Object> hashMap = new HashMap<>();
         try {
             BooleanResponse booleanResponse = getElasticSearchClient().indices()
                     .exists(existRequest -> existRequest.index(indexName));
-            result = booleanResponse.value();
+            hashMap.put(SUCCESS, booleanResponse.value());
         } catch (IOException e) {
-            result = false;
+            hashMap.put(SUCCESS, Boolean.FALSE);
+            hashMap.put(MESSAGE, e.getMessage());
         }
         // log.info("== {} 索引是否存在: {}", result);
-        return result;
+        return hashMap;
     }
 
     /**
@@ -87,9 +75,8 @@ public class ElasticSearchService {
      * @param indexName, Name of the index;
      * @param id, ID of the document
      * @return true if found, false otherwise
-     * @throws IOException,  if something happened
      */
-    public boolean existDocument(String indexName, String id) throws IOException {
+    public boolean existDocument(String indexName, String id) {
         ExistsRequest request = new ExistsRequest.Builder()
                 .index(indexName)
                 .id(id)
@@ -131,9 +118,8 @@ public class ElasticSearchService {
      * 创建index (不指定Mapping)
      * @param indexName Name of the index (needed)
      * @return true if created successfully, false otherwise
-     * @throws IOException, if something happened
      */
-    public HashMap<String, Object> createIndex(String indexName) throws IOException {
+    public HashMap<String, Object> createIndex(String indexName){
         HashMap<String, Object> hashMap = new HashMap<>();
         try {
             CreateIndexResponse createIndexResponse = getElasticSearchClient()
@@ -148,11 +134,20 @@ public class ElasticSearchService {
     }
 
 
-    // 指定mapping创建index
+    /**
+     * 指定mapping创建index
+     * @param indexName index
+     * @return hashmap  information of new index
+     * @throws IOException exception
+     */
     public HashMap<String, Object> createIndexWithMapping(String indexName) throws IOException {
         // 获取resource下对应的配置
          String fileName = EnumIndexesType.valueOf(indexName.toUpperCase()).getSettingName();
         InputStream inputStreamSettingJson = this.getClass().getClassLoader().getResourceAsStream(fileName);
+        if(inputStreamSettingJson == null) {
+            return createIndex(indexName);
+        }
+
         CreateIndexRequest request = new CreateIndexRequest.Builder()
                 .index(indexName)
                 .withJson(inputStreamSettingJson)
@@ -164,7 +159,12 @@ public class ElasticSearchService {
         return hashMap;
     }
 
-    // 查看索引相关的信息
+    /**
+     * 查看索引相关的信息
+     * @param indexName index
+     * @return hashmap message of index that you checked
+     * @throws IOException io exception
+     */
     public HashMap<String, Object> indexDetail(String indexName) throws IOException {
         HashMap<String, Object> hashMap = new HashMap<>();
         try {
@@ -179,23 +179,33 @@ public class ElasticSearchService {
         return hashMap;
     }
 
-    //向ES写入数据
-    public HashMap<String, Object> fillIndexData(String indexName) throws IOException {
+    /**
+     * 向ES写入数据
+     * @param objectArrayList arraylist(ready data)
+     * @param indexName, string index
+     * @return hashmap, after inserting, got some message about index
+     * @throws IOException, io exception
+     */
+    public HashMap<String, Object> fillIndexData(List<Object> objectArrayList, String indexName) throws IOException {
         HashMap<String, Object> hashMap = new HashMap<>();
-        List<Object> payload = getIndexCourseService().getCourseData();
-        HashMap<String, HashMap<String, Object>> map = prepareFillIndexData(indexName);
-        ArrayList<Object> objectArrayList = new ArrayList<>();
-        if ((boolean) map.get(RESULT).get(SUCCESS)) {
-            // 解析数据格式
-            payload.forEach(o -> objectArrayList.add(Courses.formatterSingleCourse((JSONObject) o)));
+        if (Objects.requireNonNull(objectArrayList).isEmpty()) {
+            hashMap.put(MESSAGE, "payload is empty!");
         }
-        hashMap.put(MESSAGE,  bulkInsertDocument(objectArrayList, indexName));
-        hashMap.put(INDEX_NAME,  indexName);
-
+        HashMap<String, HashMap<String, Object>> map = prepareFillIndexData(indexName);
+        if ((boolean) map.get(RESULT).get(SUCCESS)) {
+            hashMap.put(MESSAGE,  bulkInsertDocument(objectArrayList, indexName));
+            hashMap.put(INDEX_NAME,  indexName);
+        }
         return hashMap;
     }
 
-    // 批量插入文档
+    /**
+     * 批量插入文档
+     * @param payload arraylist
+     * @param indexName index
+     * @return
+     * @throws IOException, io exception
+     */
     public HashMap<String, Object> bulkInsertDocument(List<Object> payload, String indexName) throws IOException {
         HashMap<String, Object> hashMap = new HashMap<>();
         List<BulkOperation> bulkOperationArrayList = new ArrayList<>();
@@ -213,7 +223,7 @@ public class ElasticSearchService {
     // 写入数据之前的相关操作
     public HashMap<String, HashMap<String, Object>> prepareFillIndexData(String indexName) throws IOException {
         HashMap<String, HashMap<String, Object>> hashMap  = new HashMap<>();
-        boolean boolExist = existIndex(indexName);
+        boolean boolExist = (boolean) existIndex(indexName).get(SUCCESS);
         if (boolExist) {
             hashMap.put(RESULT, deleteIndex(indexName));
         } else {
@@ -229,18 +239,45 @@ public class ElasticSearchService {
     }
 
     //获取文档信息
-    public void getDocumentInfo() {
-
+    public HashMap<String, Object> getDocumentInfo(String indexName,  String id) throws IOException {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        GetResponse<Object> response = getElasticSearchClient().get(g -> g
+                .index(indexName)
+                .id(id),
+                Object.class
+        );
+        if (response.found()) {
+            hashMap.put(SUCCESS, Boolean.TRUE);
+            hashMap.put(RESULT, response.source());
+        } else {
+            hashMap.put(SUCCESS, Boolean.FALSE);
+            hashMap.put(RESULT, NOT_FOUND);
+        }
+        return hashMap;
     }
 
     // 更新文档
     public void updateDocument() {
 
+
+
     }
 
     // 删除文档
-    public void deleteDocument() {
-
+    public HashMap<String, Object> deleteDocument(String indexName, String id) throws IOException {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        DeleteResponse deleteResponse = getElasticSearchClient().delete(deleteRequest ->
+                deleteRequest.index(indexName).id(id)
+                );
+        String result = deleteResponse.result().toString();
+        if (Objects.equals(result, "Deleted")) {
+            hashMap.put(SUCCESS, Boolean.TRUE);
+            hashMap.put(MESSAGE, "doc has been deleted successfully");
+        } else {
+            hashMap.put(SUCCESS, Boolean.FALSE);
+            hashMap.put(MESSAGE, "Not Found the relevant doc");
+        }
+        return hashMap;
     }
 
     // 处理mapping
@@ -333,3 +370,6 @@ public class ElasticSearchService {
     }
 
 }
+
+// 关于其他几种写如的方式，参考官方文档
+// https://www.elastic.co/guide/en/elasticsearch/client/java-api-client/current/indexing.html
