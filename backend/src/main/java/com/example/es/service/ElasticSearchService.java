@@ -1,14 +1,16 @@
 package com.example.es.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.Result;
 import co.elastic.clients.elasticsearch._types.mapping.*;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.DeleteResponse;
 import co.elastic.clients.elasticsearch.core.ExistsRequest;
 import co.elastic.clients.elasticsearch.core.GetResponse;
 import co.elastic.clients.elasticsearch.core.bulk.BulkOperation;
-import co.elastic.clients.elasticsearch.indices.*;
+import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
+import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
+import co.elastic.clients.elasticsearch.indices.GetIndexResponse;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import com.example.es.client.ElasticSearchClient;
 import com.example.es.core.EnumDataType;
@@ -23,6 +25,9 @@ import java.time.Instant;
 import java.util.*;
 
 import static com.example.es.core.Constants.*;
+import static com.example.es.core.EnumMessageType.BEEN_DELETED;
+import static com.example.es.core.EnumMessageType.ES_STATUS_DOC_DEL;
+import static com.example.es.core.EnumMessageType.NOT_FOUND_DOC;
 
 
 @Service
@@ -31,7 +36,6 @@ public class ElasticSearchService {
     private ElasticsearchClient elasticsearchClient;
 
     private IndexCourseService indexCourseService;
-
 
     ReadJsonFile readJsonFile;
 
@@ -49,13 +53,7 @@ public class ElasticSearchService {
         return readJsonFile;
     }
 
-
-    /**
-     * 查看index是否在es中存在
-     * @param  indexName, Name of the Index
-     * @return true if found, false otherwise
-     */
-
+    // 查看index是否在es中存在
     public HashMap<String, Object> existIndex(String indexName) {
         HashMap<String, Object> hashMap = new HashMap<>();
         try {
@@ -70,12 +68,7 @@ public class ElasticSearchService {
         return hashMap;
     }
 
-    /**
-     * 查看相关doc是否在index中存在
-     * @param indexName, Name of the index;
-     * @param id, ID of the document
-     * @return true if found, false otherwise
-     */
+    // 查看相关doc是否在index中存在
     public boolean existDocument(String indexName, String id) {
         ExistsRequest request = new ExistsRequest.Builder()
                 .index(indexName)
@@ -92,12 +85,7 @@ public class ElasticSearchService {
         return result;
     }
 
-
-    /**
-     * 删除相关 index
-     * @param indexName, Name of th index
-     * @return true if found, false otherwise
-     */
+    // 删除相关 index
     public HashMap<String, Object> deleteIndex(String indexName) {
         HashMap<String, Object> hashMap = new HashMap<>();
         try {
@@ -113,12 +101,7 @@ public class ElasticSearchService {
 
     }
 
-    /**
-     *
-     * 创建index (不指定Mapping)
-     * @param indexName Name of the index (needed)
-     * @return true if created successfully, false otherwise
-     */
+    // 创建index (不指定Mapping)
     public HashMap<String, Object> createIndex(String indexName){
         HashMap<String, Object> hashMap = new HashMap<>();
         try {
@@ -133,13 +116,7 @@ public class ElasticSearchService {
         return hashMap;
     }
 
-
-    /**
-     * 指定mapping创建index
-     * @param indexName index
-     * @return hashmap  information of new index
-     * @throws IOException exception
-     */
+    // 指定mapping创建index
     public HashMap<String, Object> createIndexWithMapping(String indexName) throws IOException {
         // 获取resource下对应的配置
          String fileName = EnumIndexesType.valueOf(indexName.toUpperCase()).getSettingName();
@@ -147,7 +124,6 @@ public class ElasticSearchService {
         if(inputStreamSettingJson == null) {
             return createIndex(indexName);
         }
-
         CreateIndexRequest request = new CreateIndexRequest.Builder()
                 .index(indexName)
                 .withJson(inputStreamSettingJson)
@@ -159,12 +135,7 @@ public class ElasticSearchService {
         return hashMap;
     }
 
-    /**
-     * 查看索引相关的信息
-     * @param indexName index
-     * @return hashmap message of index that you checked
-     * @throws IOException io exception
-     */
+    // 查看索引相关的信息
     public HashMap<String, Object> indexDetail(String indexName) throws IOException {
         HashMap<String, Object> hashMap = new HashMap<>();
         try {
@@ -179,13 +150,7 @@ public class ElasticSearchService {
         return hashMap;
     }
 
-    /**
-     * 向ES写入数据
-     * @param objectArrayList arraylist(ready data)
-     * @param indexName, string index
-     * @return hashmap, after inserting, got some message about index
-     * @throws IOException, io exception
-     */
+    // 向ES写入数据
     public HashMap<String, Object> fillIndexData(List<Object> objectArrayList, String indexName) throws IOException {
         HashMap<String, Object> hashMap = new HashMap<>();
         if (Objects.requireNonNull(objectArrayList).isEmpty()) {
@@ -199,13 +164,7 @@ public class ElasticSearchService {
         return hashMap;
     }
 
-    /**
-     * 批量插入文档
-     * @param payload arraylist
-     * @param indexName index
-     * @return
-     * @throws IOException, io exception
-     */
+    // 批量插入文档
     public HashMap<String, Object> bulkInsertDocument(List<Object> payload, String indexName) throws IOException {
         HashMap<String, Object> hashMap = new HashMap<>();
         List<BulkOperation> bulkOperationArrayList = new ArrayList<>();
@@ -216,6 +175,7 @@ public class ElasticSearchService {
         BulkResponse bulkResponse = getElasticSearchClient().bulk(os -> os.index(indexName).operations(bulkOperationArrayList));
         Instant afterTime = Instant.now();
         hashMap.put(COUNT, bulkResponse.items().size());
+        hashMap.put(SUCCESS, bulkResponse.errors());
         hashMap.put(COST_TIME, Duration.between(beforeTime,afterTime).getSeconds() + "(秒)");
         return hashMap;
     }
@@ -230,12 +190,6 @@ public class ElasticSearchService {
             hashMap.put(RESULT, createIndexWithMapping(indexName));
         }
         return hashMap;
-    }
-
-
-    // 添加文档
-    public void  addNewDocument() {
-
     }
 
     //获取文档信息
@@ -259,7 +213,10 @@ public class ElasticSearchService {
     // 更新文档
     public void updateDocument() {
 
+    }
 
+    // 添加文档
+    public void  addNewDocument() {
 
     }
 
@@ -270,12 +227,12 @@ public class ElasticSearchService {
                 deleteRequest.index(indexName).id(id)
                 );
         String result = deleteResponse.result().toString();
-        if (Objects.equals(result, "Deleted")) {
+        if (Objects.equals(result, ES_STATUS_DOC_DEL.toString())) {
             hashMap.put(SUCCESS, Boolean.TRUE);
-            hashMap.put(MESSAGE, "doc has been deleted successfully");
+            hashMap.put(MESSAGE, BEEN_DELETED);
         } else {
             hashMap.put(SUCCESS, Boolean.FALSE);
-            hashMap.put(MESSAGE, "Not Found the relevant doc");
+            hashMap.put(MESSAGE, NOT_FOUND_DOC);
         }
         return hashMap;
     }

@@ -1,0 +1,108 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": "1",
+      "number_of_replicas": "2",
+      "analysis": {
+        "filter": {
+          "autocomplete_filter": {
+            "type": "edge_ngram",
+            "min_gram": "1",
+            "max_gram": "15"
+          }
+        },
+        "analyzer": {
+          "autocomplete_index": {
+            "filter": [
+              "lowercase",
+              "autocomplete_filter"
+            ],
+            "type": "custom",
+            "tokenizer": "standard"
+          },
+          "autocomplete_search": {
+            "filter": [
+              "lowercase"
+            ],
+            "type": "custom",
+            "tokenizer": "standard"
+          }
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "ID": {
+        "type": "keyword"
+      },
+      "licenses": {
+        "type": "long"
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "name_product": {
+        "type": "alias",
+        "path": "name"
+      },
+      "subSolutionAreaName": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "subSolutionAreaId": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "orders": {
+        "type": "long"
+      },
+      "portfolioCategoryKey": {
+        "type": "keyword"
+      },
+      "portfolioCategoryName": {
+        "type": "text",
+        "analyzer": "autocomplete_index",
+        "search_analyzer": "autocomplete_search"
+      },
+      "portfolioCategoryName_product": {
+        "type": "alias",
+        "path": "portfolioCategoryName"
+      },
+      "typeName": {
+        "type": "keyword"
+      },
+      "tenants": {
+        "type": "long"
+      },
+      "tenantsDisrupted": {
+        "type": "long"
+      },
+      "incidents": {
+        "type": "keyword"
+      },
+      "incidentsRequiringAttention": {
+        "type": "long"
+      },
+      "isFavorite": {
+        "type": "boolean"
+      },
+      "__companyID": {
+        "type": "keyword"
+      },
+      "__timestamp": {
+        "type": "date"
+      }
+    }
+  }
+}
