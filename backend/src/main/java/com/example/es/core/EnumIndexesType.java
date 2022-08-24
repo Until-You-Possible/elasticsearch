@@ -3,7 +3,8 @@ package com.example.es.core;
 public enum EnumIndexesType {
 
     SYSTEM("system", "system_setting.json"),
-    COURSES("courses","courses_setting.json");
+    COURSES("courses","courses_setting.json"),
+    PRODUCT("product", "product_setting.json");
 
     private final String name;
 

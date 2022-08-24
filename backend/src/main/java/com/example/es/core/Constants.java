@@ -14,6 +14,8 @@ public class Constants {
 
     public static final String PASSWORD = "password";
 
+    public static final String ACCOUNT = "account";
+
     public static final String INDEX_NAME = "indexName";
 
     public static final String DATA = "data";
@@ -47,6 +49,17 @@ public class Constants {
     public static final String COST_TIME = "cost_time";
 
     public static final String NOT_FOUND = "not found";
+
+    public static final String PRIVATERESOURCEPATH = "privateInformation/account.json";
+
+    public static final String HITS = "hits";
+
+    public static final String HIT = "hit";
+
+    public static final String PRIVATEINFORMATION = "privateInformation";
+
+    public static final String PRODUCT = "product";
+
 
 
 

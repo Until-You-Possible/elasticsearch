@@ -3,11 +3,10 @@ package com.example.es.util.readSetting;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.example.es.util.CommonUtil;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.Objects;
+
+import static com.example.es.core.Constants.*;
+
 
 public class ReadAccountMessage {
 
@@ -42,6 +41,7 @@ public class ReadAccountMessage {
     }
 
     public HashMap<String, String> getAccountInformation() {
+
         HashMap<String, String> hashMap = new HashMap<>();
 
         String infoPath = getAccountPathInfo();
@@ -50,11 +50,11 @@ public class ReadAccountMessage {
 
         JSONObject jsonObject = JSON.parseObject(realInfoString);
 
-        String account  = (String) jsonObject.getJSONObject("ray").get("account");
-        String password = (String) jsonObject.getJSONObject("ray").get("password");
+        String account  = (String) jsonObject.getJSONObject("ray").get(ACCOUNT);
+        String password = (String) jsonObject.getJSONObject("ray").get(PASSWORD);
 
-        hashMap.put("username", account);
-        hashMap.put("password", password);
+        hashMap.put(USERNAME, account);
+        hashMap.put(PASSWORD, password);
 
         return hashMap;
     }
