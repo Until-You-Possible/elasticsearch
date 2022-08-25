@@ -2,7 +2,7 @@ package com.example.es.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.example.es.service.ElasticSearchService;
 import com.example.es.service.IndexCourseService;
-import com.example.es.service.IndexProductService;
+import com.example.es.service.IndexDataService;
 import com.example.es.util.request.HttpClientToInterface;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,7 +33,7 @@ public class TestController {
 
     @GetMapping("/in")
     public HashMap<String, Object> index2() throws IOException {
-        return new IndexProductService().fillIndexProduct();
+        return new IndexDataService().fillIndexProduct();
     }
 
     @GetMapping("/index")

@@ -1,12 +1,9 @@
 package com.example.es.util.readSetting;
 
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
-public class ReadJsonFile {
+public class ReadLocalFile {
 
     public String readJsonSetting(String fileName) {
 

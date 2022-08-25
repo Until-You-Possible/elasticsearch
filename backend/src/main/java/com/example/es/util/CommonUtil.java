@@ -1,17 +1,29 @@
 package com.example.es.util;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.es.util.readSetting.ReadAccountMessage;
+import com.example.es.util.readSetting.ReadLocalFile;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.example.es.core.Constants.DATA;
+import static com.example.es.core.Constants.*;
 
 public class CommonUtil {
+
+    private static ReadLocalFile readJsonFile;
+
+    private static ReadLocalFile getReadJsonFile() {
+        if (readJsonFile == null) {
+            return  readJsonFile = new ReadLocalFile();
+        }
+        return readJsonFile;
+    }
 
     public static String getType(Object o) {
         return o.getClass().toString();
@@ -49,6 +61,20 @@ public class CommonUtil {
 
     public static long getCurrentTime() {
         return System.currentTimeMillis();
+    }
+
+    // 获取数据源(目前存放本地的json)
+    public static HashMap<String, List<Object>> getIndexJsonArray(String indexName) {
+        HashMap<String, List<Object>> hashMap = new HashMap<>();
+        // 读取json存放的路径
+        String resourceConfigPath = getReadJsonFile().readJsonSetting(CommonUtil.getResourceFilePath(PRIVATERESOURCEPATH));
+        JSONObject jsonObject = JSONObject.parseObject(resourceConfigPath);
+        String jsonPath = (String) jsonObject.getJSONObject("privateMessage").get(indexName);
+        // 读取对应的文件
+        JSONObject jsonFile = JSONObject.parseObject(getReadJsonFile().readJsonSetting(jsonPath));
+        JSONArray jsonArray = jsonFile.getJSONObject(HITS).getJSONArray(HITS);
+        hashMap.put(RESULT, jsonArray.toJavaList(Object.class));
+        return hashMap;
     }
 
 

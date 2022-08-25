@@ -15,7 +15,7 @@ import co.elastic.clients.transport.endpoints.BooleanResponse;
 import com.example.es.client.ElasticSearchClient;
 import com.example.es.core.EnumDataType;
 import com.example.es.core.EnumIndexesType;
-import com.example.es.util.readSetting.ReadJsonFile;
+import com.example.es.util.readSetting.ReadLocalFile;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class ElasticSearchService {
 
     private IndexCourseService indexCourseService;
 
-    ReadJsonFile readJsonFile;
+    ReadLocalFile readJsonFile;
 
     private ElasticsearchClient getElasticSearchClient() {
         if (elasticsearchClient == null) {
@@ -46,9 +46,9 @@ public class ElasticSearchService {
         return elasticsearchClient;
     }
 
-    private ReadJsonFile getReadJsonFile() {
+    private ReadLocalFile getReadJsonFile() {
         if (readJsonFile == null) {
-            return  readJsonFile = new ReadJsonFile();
+            return  readJsonFile = new ReadLocalFile();
         }
         return readJsonFile;
     }

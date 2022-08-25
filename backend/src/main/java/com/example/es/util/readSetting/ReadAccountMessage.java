@@ -10,11 +10,11 @@ import static com.example.es.core.Constants.*;
 
 public class ReadAccountMessage {
 
-    ReadJsonFile readJsonFile;
+    ReadLocalFile readJsonFile;
 
-    private ReadJsonFile getReadJsonFile() {
+    private ReadLocalFile getReadJsonFile() {
         if (readJsonFile == null) {
-           return  readJsonFile = new ReadJsonFile();
+           return  readJsonFile = new ReadLocalFile();
         }
         return readJsonFile;
     }
