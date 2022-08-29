@@ -1,9 +1,6 @@
 package com.example.es.controller;
 
-
-import com.example.es.service.IndexCourseService;
 import com.example.es.service.IndexDataService;
-import com.example.es.service.IndexProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

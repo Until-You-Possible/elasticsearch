@@ -32,3 +32,16 @@ replicas是index sharps的副本(copy)。通常是用来备份index data的，�
 ![img.png](img.png)
 
 [相关参考链接](https://blog.csdn.net/sinat_16658263/article/details/90444038)
+
+***index***
+
+Elastic会索引所有的字段，经过处理后写入一个反向索引(inverted index)，查找数据的时候，直接查找该索引，所以es数据管理的顶层单位就叫索引(index)
+可以类比数据库的表，每个index的名字必须是小写。
+
+***Document***
+
+index里的单条纪录称之为Document(文档),许多条Document构成了一个index。Document使用JSON格式来表示。
+
+***Type***
+
+在6.x的版本中，只允许每个index包含一个Type,后续的版本都废弃，移除了，这里不做讨论。

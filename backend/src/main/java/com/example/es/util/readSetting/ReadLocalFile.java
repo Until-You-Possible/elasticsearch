@@ -30,7 +30,6 @@ public class ReadLocalFile {
 
             e.printStackTrace();
             return null;
-
         }
     }
 }
