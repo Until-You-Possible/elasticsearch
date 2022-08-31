@@ -11,7 +11,7 @@ import java.util.HashMap;
 
 @RestController
 @RequestMapping("/index")
-public class indexDataController {
+public class IndexDataController {
 
     @Autowired
     private IndexDataService indexDataService;

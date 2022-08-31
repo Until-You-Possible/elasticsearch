@@ -62,6 +62,10 @@ public class Constants {
 
     public static final String USER = "user";
 
+    public static final String PYTHON3 = "python3";
+
+    public static final String FILEPATH = "filePath";
+
 
 
 
