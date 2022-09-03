@@ -3,14 +3,19 @@
 # @File:JavaRunPythonWithParams.py
 import sys
 
+class TestPy:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+    #
+    # def func(self, b, c):
+    #     return self + b + c
 
-def func(a, b, c):
-    return a + b + c
 
 
 if __name__ == '__main__':
-    arr = []
-    for i in range(1, len(sys.argv)):
-        arr.append((int(sys.argv[i])))
-
-    print(func(arr[0], arr[1], arr[2]))
+    # arr = []
+    # for i in range(1, len(sys.argv)):
+    #     arr.append((int(sys.argv[i])))
+    dog = TestPy("pip", 3)
+    print(dog)

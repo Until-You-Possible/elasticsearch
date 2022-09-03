@@ -21,16 +21,13 @@ public class PythonTestController {
     @GetMapping("/index")
     public HashMap<String, Object> index() {
         HashMap<String, Object> hashMap = new HashMap<>();
-        String fileName = "pythonFile/JavaRunPythonWithParams.py";
+        String fileName = "pythonFile/KNN.py";
         Process process;
-        int firstNumber = 10;
-        int secondNumber = 20;
-        int thirdNumber = 20;
         try {
             String pyFilePath = Objects.requireNonNull(PythonTestController.class.getClassLoader()
                     .getResource(fileName)).getPath();
             String command = PYTHON3 + " "  + pyFilePath;
-            String[] args = new String[] { PYTHON3, pyFilePath, String.valueOf(firstNumber), String.valueOf(secondNumber), String.valueOf(thirdNumber)};
+            String[] args = new String[] { PYTHON3, pyFilePath,};
             process = Runtime.getRuntime().exec(args);
             // 用输入输出流来获取结果
             BufferedReader in = new BufferedReader(new InputStreamReader(process.getInputStream()));
