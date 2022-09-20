@@ -67,6 +67,7 @@ public class PmmlTestController {
         return modelEvaluatorFactory.newModelEvaluator(pmml);
     }
 
+
     private void predict(Evaluator evaluator) {
         // 测试数据
         Map<String, Double> map = new HashMap<>();
